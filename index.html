@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>5 jours en Italie - Vérificateur d'indices</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        #quiz-container { max-width: 500px; margin: auto; }
+        #checkMsg { color: orange; font-weight: bold; margin-top: 15px; }
+        #result { font-size: 1.2em; margin-top: 15px; }
+        button:disabled { opacity: 0.5; }
+    </style>
+</head>
+<body>
+    <div id="quiz-container">
+        <h1>5 jours en Italie - Vérificateur d'indices</h1>
+        <div id="question"></div>
+        <input type="text" id="answer" autocomplete="off" placeholder="Votre réponse">
+        <button id="checkBtn">Vérifier indice</button>
+        <div id="checkMsg"></div>
+        <div id="result"></div>
+        <button id="nextBtn" style="display:none; margin-top: 20px;">Next Question</button>
+    </div>
+
+    <script>
+    // Fetch and display the first question on load
+    let currentQuestionIndex = 0;
+    let questions = [];
+
+    function displayQuestion() {
+        if (currentQuestionIndex < questions.length) {
+            document.getElementById('question').textContent = questions[currentQuestionIndex].question;
+            document.getElementById('answer').value = '';
+            document.getElementById('result').textContent = '';
+            document.getElementById('checkMsg').textContent = '';
+            document.getElementById('checkBtn').disabled = false;
+            document.getElementById('nextBtn').style.display = "none";
+        } else {
+            document.getElementById('question').textContent = "Quiz terminé !";
+            document.getElementById('answer').style.display = "none";
+            document.getElementById('checkBtn').style.display = "none";
+            document.getElementById('nextBtn').style.display = "none";
+            document.getElementById('result').textContent = "";
+            document.getElementById('checkMsg').textContent = "";
+        }
+    }
+
+    function fetchQuestions() {
+        fetch('/questions')
+            .then(res => res.json())
+            .then(data => {
+                questions = data;
+                currentQuestionIndex = 0;
+                displayQuestion();
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        fetchQuestions();
+
+        const checkBtn = document.getElementById('checkBtn');
+        const checkMsg = document.getElementById('checkMsg');
+        const resultDiv = document.getElementById('result');
+        const answerInput = document.getElementById('answer');
+        const nextBtn = document.getElementById('nextBtn');
+
+        checkBtn.addEventListener('click', function () {
+            // Show "Vérification en cours...merci de patienter" message and disable button
+            checkMsg.textContent = "Vérification en cours...merci de patienter";
+            resultDiv.textContent = ""; // Clear previous result
+            checkBtn.disabled = true;   // Disable button
+
+            // Wait 5 seconds before checking the answer
+            setTimeout(function () {
+                fetch('/check-answer', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        answer: answerInput.value,
+                        questionIndex: currentQuestionIndex
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    checkMsg.textContent = ""; // Hide "Check in progress..."
+                    if (data.correct) {
+                        resultDiv.textContent = "Correct!";
+                        resultDiv.style.color = "green";
+                        nextBtn.style.display = "inline-block";
+                    } else {
+                        resultDiv.textContent = "Incorrect!";
+                        resultDiv.style.color = "red";
+                        nextBtn.style.display = "inline-block";
+                    }
+                })
+                .catch(() => {
+                    checkMsg.textContent = "";
+                    resultDiv.textContent = "Cet indice n'est pas bon, essayez encore";
+                    resultDiv.style.color = "red";
+                })
+                .finally(() => {
+                    checkBtn.disabled = false;
+                });
+            }, 5000); // 5 seconds
+        });
+
+        nextBtn.addEventListener('click', function () {
+            currentQuestionIndex++;
+            displayQuestion();
+        });
+
+        answerInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !checkBtn.disabled) {
+                checkBtn.click();
+            }
+        });
+    });
+    </script>
+</body>
+</html>
