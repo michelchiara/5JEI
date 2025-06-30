@@ -22,9 +22,6 @@ fs.readFile(csvFilePath, 'utf8', (err, data) => {
       const value = line.substring(comma + 1).trim();
       return [key, value];
     }).filter(([key, value]) => key && value);
-
-    // For debugging: print keys loaded
-    //console.log('Loaded keys:', enigmes.map(([key]) => `"${key}"`));
   } else {
     console.error('Could not read enigmes.csv:', err);
   }
@@ -42,8 +39,8 @@ function logAttempt(userInput, result) {
   );
 }
 
-// Serve static files (for index.html, etc.)
-app.use(express.static(__dirname + '/public'));
+// Serve static files from the "public" directory
+app.use(express.static(path.join(__dirname, 'public')));
 
 // API endpoint to check answer
 app.post('/check', (req, res) => {
