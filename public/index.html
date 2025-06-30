@@ -19,27 +19,23 @@
         <button id="checkBtn">Vérifier indice</button>
         <div id="checkMsg"></div>
         <div id="result"></div>
-        <button id="nextBtn" style="display:none; margin-top: 20px;">Next Question</button>
     </div>
 
     <script>
-    // Fetch and display the first question on load
-    let currentQuestionIndex = 0;
+    // Fetch and display the question on load (single question version)
     let questions = [];
 
     function displayQuestion() {
-        if (currentQuestionIndex < questions.length) {
-            document.getElementById('question').textContent = questions[currentQuestionIndex].question;
+        if (questions.length > 0) {
+            document.getElementById('question').textContent = questions[0].question;
             document.getElementById('answer').value = '';
             document.getElementById('result').textContent = '';
             document.getElementById('checkMsg').textContent = '';
             document.getElementById('checkBtn').disabled = false;
-            document.getElementById('nextBtn').style.display = "none";
         } else {
             document.getElementById('question').textContent = "Quiz terminé !";
             document.getElementById('answer').style.display = "none";
             document.getElementById('checkBtn').style.display = "none";
-            document.getElementById('nextBtn').style.display = "none";
             document.getElementById('result').textContent = "";
             document.getElementById('checkMsg').textContent = "";
         }
@@ -50,7 +46,6 @@
             .then(res => res.json())
             .then(data => {
                 questions = data;
-                currentQuestionIndex = 0;
                 displayQuestion();
             });
     }
@@ -62,7 +57,6 @@
         const checkMsg = document.getElementById('checkMsg');
         const resultDiv = document.getElementById('result');
         const answerInput = document.getElementById('answer');
-        const nextBtn = document.getElementById('nextBtn');
 
         checkBtn.addEventListener('click', function () {
             // Show "Vérification en cours...merci de patienter" message and disable button
@@ -76,8 +70,7 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        answer: answerInput.value,
-                        questionIndex: currentQuestionIndex
+                        answer: answerInput.value
                     })
                 })
                 .then(response => response.json())
@@ -86,11 +79,9 @@
                     if (data.correct) {
                         resultDiv.textContent = data.message;
                         resultDiv.style.color = "green";
-                        nextBtn.style.display = "inline-block";
                     } else {
                         resultDiv.textContent = "Incorrect!";
                         resultDiv.style.color = "red";
-                        nextBtn.style.display = "inline-block";
                     }
                 })
                 .catch(() => {
@@ -102,11 +93,6 @@
                     checkBtn.disabled = false;
                 });
             }, 5000); // 5 seconds
-        });
-
-        nextBtn.addEventListener('click', function () {
-            currentQuestionIndex++;
-            displayQuestion();
         });
 
         answerInput.addEventListener('keydown', function(e) {
