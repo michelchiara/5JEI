@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>5 jours en Italie - Quiz</title>
+    <title>5 jours en Italie - vérification des réponses - voir chapitre règles pour plus d'informations</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 40px; }
         #quiz-container { max-width: 500px; margin: auto; }
@@ -95,7 +95,7 @@
                 })
                 .catch(() => {
                     checkMsg.textContent = "";
-                    resultDiv.textContent = "An error occurred. Please try again.";
+                    resultDiv.textContent = "Réponse incorrecte, veuillez réessayer";
                     resultDiv.style.color = "red";
                 })
                 .finally(() => {
