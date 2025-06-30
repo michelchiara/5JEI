@@ -35,6 +35,11 @@
             justify-content: center;
             color: #333;
             box-sizing: border-box;
+            /* Integrated image as background */
+            background-image: url('image1');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
         }
         
         #quiz-container {
@@ -268,7 +273,7 @@
                         resultDiv.textContent = data.message;
                         resultDiv.style.color = "green";
                     } else {
-                        resultDiv.textContent = "Raté, allez vous pouvez le faire!";
+                        resultDiv.textContent = "Incorrect!";
                         resultDiv.style.color = "red";
                     }
                 })
