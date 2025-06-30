@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>5 Jours en Italie - vérification des indices</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            background: linear-gradient(120deg, #f7cac9, #92a8d1 80%);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        #container {
+            background: rgba(255,255,255,0.97);
+            max-width: 420px;
+            margin: 70px auto 0;
+            padding: 32px 30px 28px 30px;
+            border-radius: 16px;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.10);
+        }
+        h1 {
+            text-align: center;
+            color: #1c3879;
+            margin-bottom: 30px;
+            letter-spacing: .02em;
+            font-size: 1.3em;
+        }
+        label {
+            font-weight: 500;
+            color: #325288;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 1em;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            margin-top: 6px;
+            transition: border-color .2s;
+        }
+        input[type="text"]:focus {
+            border-color: #1c3879;
+            outline: none;
+        }
+        button {
+            background: linear-gradient(90deg, #1c3879 60%, #607eaa);
+            color: white;
+            font-size: 1em;
+            padding: 10px 26px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background .2s, transform .09s;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        #checkMsg {
+            color: #ff9800;
+            font-weight: 600;
+            text-align: center;
+            margin: 18px 0 0 0;
+            min-height: 24px;
+            letter-spacing: .03em;
+        }
+        #result {
+            font-size: 1.15em;
+            text-align: center;
+            margin-top: 20px;
+            font-weight: 600;
+            min-height: 26px;
+        }
+        @media (max-width: 600px) {
+            #container {
+                max-width: 98vw;
+                padding: 18px 4vw 18px 4vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>5 Jours en Italie - vérification des indices</h1>
+        <form id="verifForm" autocomplete="off">
+            <label for="proposition">Entrez votre proposition ici (voir chapitre règles)</label>
+            <input type="text" id="proposition" required>
+            <button type="submit" id="checkBtn">Check answer</button>
+        </form>
+        <div id="checkMsg"></div>
+        <div id="result"></div>
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('verifForm');
+        const checkBtn = document.getElementById('checkBtn');
+        const checkMsg = document.getElementById('checkMsg');
+        const resultDiv = document.getElementById('result');
+        const propositionInput = document.getElementById('proposition');
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (!propositionInput.value.trim()) {
+                checkMsg.textContent = "Veuillez entrer une proposition.";
+                return;
+            }
+            checkMsg.textContent = "check in progress";
+            resultDiv.textContent = "";
+            checkBtn.disabled = true;
+
+            setTimeout(function () {
+                fetch('/check-answer', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ proposition: propositionInput.value })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    checkMsg.textContent = "";
+                    if (data.found) {
+                        resultDiv.textContent = data.result;
+                        resultDiv.style.color = "green";
+                    } else {
+                        resultDiv.textContent = "Indice incorrect, esssayez encore";
+                        resultDiv.style.color = "crimson";
+                    }
+                })
+                .catch(() => {
+                    checkMsg.textContent = "";
+                    resultDiv.textContent = "Une erreur est survenue. Veuillez réessayer.";
+                    resultDiv.style.color = "crimson";
+                })
+                .finally(() => {
+                    checkBtn.disabled = false;
+                });
+            }, 5000); // 5 seconds
+        });
+
+        propositionInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !checkBtn.disabled) {
+                e.preventDefault();
+                checkBtn.click();
+            }
+        });
+    });
+    </script>
+</body>
+</html>
