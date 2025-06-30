@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>5 Jours en Italie - vérification des indices</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 2em; background: #f7f7f7; }
+        .container { max-width: 420px; margin: 2em auto; padding: 2em; background: #fff; border-radius: 8px; box-shadow: 0 0 8px rgba(0,0,0,0.07);}
+        label { font-weight: bold; }
+        input[type="text"] { width: 100%; padding: 0.6em; margin-top: 0.2em; margin-bottom: 1em; border-radius: 4px; border: 1px solid #bbb; font-size: 1em;}
+        button { background: #4285f4; color: #fff; border: none; padding: 0.6em 1.4em; border-radius: 4px; font-size: 1em; cursor: pointer;}
+        button:hover { background: #326ac0; }
+        .result { margin-top: 1.5em; padding: 1em; border-radius: 4px; background: #f1f1f1;}
+        .error { color: #c00; background: #ffeaea;}
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>5 Jours en Italie - vérification des indices</h2>
+    <form id="check-form" autocomplete="off">
+        <label for="proposition">Entrez votre proposition ici (voir chapitre règles)</label>
+        <input type="text" id="proposition" name="proposition" required>
+        <button type="submit">Check answer</button>
+    </form>
+    <div id="result" class="result" style="display:none"></div>
+</div>
+<script>
+document.getElementById('check-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const userInput = document.getElementById('proposition').value.trim();
+    const resultDiv = document.getElementById('result');
+    resultDiv.style.display = 'none';
+    fetch('/check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ answer: userInput })
+    })
+    .then(response => response.json())
+    .then(data => {
+        resultDiv.textContent = data.message;
+        resultDiv.className = data.valid ? 'result' : 'result error';
+        resultDiv.style.display = 'block';
+    })
+    .catch(() => {
+        resultDiv.textContent = "Erreur de communication avec le serveur.";
+        resultDiv.className = "result error";
+        resultDiv.style.display = "block";
+    });
+});
+</script>
+</body>
+</html>
