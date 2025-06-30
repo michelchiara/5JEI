@@ -72,7 +72,7 @@
 
             // Wait 5 seconds before checking the answer
             setTimeout(function () {
-                fetch('/check-answer', {
+                fetch('/check', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -84,7 +84,7 @@
                 .then(data => {
                     checkMsg.textContent = ""; // Hide "Check in progress..."
                     if (data.correct) {
-                        resultDiv.textContent = "Correct!";
+                        resultDiv.textContent = data.message;
                         resultDiv.style.color = "green";
                         nextBtn.style.display = "inline-block";
                     } else {

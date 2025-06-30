@@ -7,7 +7,6 @@ const logFilePath = path.join(__dirname, 'attempts.log');
 const app = express();
 app.use(express.json());
 
-// Parse CSV and keep in memory for quick lookup
 let enigmes = [];
 fs.readFile(csvFilePath, 'utf8', (err, data) => {
   if (!err) {
@@ -15,21 +14,22 @@ fs.readFile(csvFilePath, 'utf8', (err, data) => {
       const comma = line.indexOf(',');
       if (comma === -1) return [null, null];
       let key = line.substring(0, comma).trim();
-      // Remove BOM just in case
       if (idx === 0 && key.charCodeAt(0) === 0xFEFF) {
         key = key.slice(1);
       }
       const value = line.substring(comma + 1).trim();
       return [key, value];
     }).filter(([key, value]) => key && value);
+    console.log('Loaded enigmes:', enigmes.length);
   } else {
     console.error('Could not read enigmes.csv:', err);
   }
 });
 
-// Function to log attempts
 function logAttempt(userInput, result) {
   const now = new Date().toISOString();
+  console.log('Logging attempt:', now, userInput, result);
+  console.log('Attempting to write to:', logFilePath);
   fs.appendFile(
     logFilePath,
     `${now} | ${userInput} | ${result}\n`,
@@ -39,22 +39,27 @@ function logAttempt(userInput, result) {
   );
 }
 
-// Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// API endpoint to check answer
+// Minimal /questions endpoint so your frontend loads
+app.get('/questions', (req, res) => {
+  // Placeholder: You can expand this with real questions if needed!
+  res.json([
+    { question: "Entrez votre indice pour l'énigme." }
+  ]);
+});
+
 app.post('/check', (req, res) => {
   const userInput = (req.body.answer || '').trim();
   const entry = enigmes.find(([key]) => key === userInput);
   if (entry) {
     logAttempt(userInput, entry[1]);
-    res.json({ valid: true, message: entry[1] });
+    res.json({ correct: true, message: entry[1] });
   } else {
     logAttempt(userInput, "incorrect");
-    res.json({ valid: false, message: "Indice incorrect, esssayez encore" });
+    res.json({ correct: false, message: "Indice incorrect, essayez encore" });
   }
 });
 
-// Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
