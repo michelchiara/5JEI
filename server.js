@@ -1,38 +1,39 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const fs = require('fs');
 const path = require('path');
-const csvFilePath = path.join(__dirname, 'enigmes.csv');
 
 const app = express();
-app.use(express.json());
+app.use(bodyParser.json());
+app.use(express.static('public'));
 
-// Parse CSV and keep in memory for quick lookup
-let enigmes = [];
-fs.readFile(csvFilePath, 'utf8', (err, data) => {
-  if (!err) {
-    enigmes = data.trim().split('\n').map(line => {
-      const idx = line.indexOf(',');
-      return [line.substring(0, idx), line.substring(idx + 1)];
+const LOG_FILE = path.join(__dirname, 'attempts.log');
+
+function logAttempt(userPrompt) {
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0];
+    const timeStr = now.toTimeString().split(' ')[0];
+    const logEntry = `${dateStr} ${timeStr} | ${userPrompt}\n`;
+    fs.appendFile(LOG_FILE, logEntry, (err) => {
+        if (err) console.error('Failed to log attempt:', err);
     });
-  } else {
-    console.error('Could not read enigmes.csv:', err);
-  }
+}
+
+// Example route for checking an answer (modify as needed)
+app.post('/check-answer', (req, res) => {
+    const { answer, questionIndex } = req.body;
+    logAttempt(answer); // Log the user prompt (answer)
+
+    // ... your existing answer checking logic ...
+    // For demonstration:
+    const isCorrect = answer.trim().toLowerCase() === 'your_expected_answer'; // Replace logic as needed
+
+    res.json({ correct: isCorrect });
 });
 
-// API endpoint to check answer
-app.post('/check', (req, res) => {
-  const userInput = (req.body.answer || '').trim();
-  const entry = enigmes.find(([key]) => key === userInput);
-  if (entry) {
-    res.json({ valid: true, message: entry[1] });
-  } else {
-    res.json({ valid: false, message: "Indice incorrect, esssayez encore" });
-  }
-});
+// ... your other routes ...
 
-// Serve static files (for index.html, etc.)
-app.use(express.static(__dirname));
-
-// Start server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
