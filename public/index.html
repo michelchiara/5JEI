@@ -3,22 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <title>5 jours en Italie - Vérificateur d'indices</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        #quiz-container { max-width: 500px; margin: auto; }
-        #checkMsg { color: orange; font-weight: bold; margin-top: 15px; }
-        #result { font-size: 1.2em; margin-top: 15px; }
-        button:disabled { opacity: 0.5; }
+        :root {
+            --main-bg: linear-gradient(135deg, #FFDEE9 0%, #B5FFFC 100%);
+            --card-bg: rgba(255, 255, 255, 0.92);
+            --accent: #ff5e62;
+            --accent2: #ff9966;
+            --romantic-pink: #ffb6c1;
+            --romantic-red: #ff5e62;
+            --romantic-purple: #b993d6;
+            --romantic-blue: #56ccf2;
+            --input-bg: #fff4f8;
+            --shadow: 0 4px 24px rgba(0,0,0,0.13);
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            width: 100%;
+            margin: 0;
+            font-family: 'Quicksand', 'Arial', sans-serif;
+            background: var(--main-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            box-sizing: border-box;
+        }
+        
+        #quiz-container {
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            border-radius: 22px;
+            padding: 2.5em 1.5em 2em 1.5em;
+            max-width: 390px;
+            width: 100%;
+            margin: 1em;
+            position: relative;
+            border: 3px solid var(--romantic-pink);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #quiz-container:before {
+            content: "💖";
+            font-size: 3.3em;
+            position: absolute;
+            top: -1.2em;
+            left: 50%;
+            transform: translateX(-50%);
+            text-shadow: 0 2px 4px #fff1;
+        }
+
+        h1 {
+            margin-top: 0.5em;
+            margin-bottom: 0.8em;
+            font-size: 2em;
+            font-family: 'Pacifico', 'Brush Script MT', cursive, sans-serif;
+            color: var(--romantic-red);
+            text-align: center;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 16px #fff5, 2px 2px 0 var(--romantic-pink);
+        }
+
+        #question {
+            font-size: 1.16em;
+            background: linear-gradient(90deg, var(--romantic-blue), var(--romantic-pink));
+            color: #fff;
+            border-radius: 1em;
+            padding: 0.8em 1.2em;
+            text-align: center;
+            margin-bottom: 1.1em;
+            box-shadow: 0 2px 7px #b993d620;
+            font-family: 'Quicksand', 'Arial', sans-serif;
+        }
+
+        #answer {
+            width: 90%;
+            padding: 0.7em 1em;
+            border: 2px solid var(--romantic-pink);
+            border-radius: 1em;
+            font-size: 1.04em;
+            margin-bottom: 1em;
+            background: var(--input-bg);
+            transition: border 0.2s;
+            outline: none;
+            box-shadow: 0 2px 12px #ffb6c117;
+        }
+
+        #answer:focus {
+            border: 2.5px solid var(--accent);
+            background: #fff;
+        }
+
+        #checkBtn {
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            color: #fff;
+            border: none;
+            border-radius: 1em;
+            padding: 0.7em 2.2em;
+            font-size: 1.12em;
+            font-family: 'Quicksand', 'Arial', sans-serif;
+            box-shadow: 0 2px 10px #ffb6c131;
+            cursor: pointer;
+            transition: background .2s, box-shadow .2s, transform .1s;
+            font-weight: bold;
+            margin-bottom: 1em;
+        }
+        #checkBtn:active {
+            transform: scale(0.98);
+        }
+        #checkBtn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: #eee;
+            color: #aaa;
+            box-shadow: none;
+        }
+
+        #checkMsg {
+            color: var(--romantic-purple);
+            font-weight: bold;
+            margin-top: 0.6em;
+            margin-bottom: 0.6em;
+            font-size: 1.04em;
+            text-align: center;
+        }
+
+        #result {
+            font-size: 1.25em;
+            margin-top: 1.2em;
+            margin-bottom: 0.2em;
+            text-align: center;
+            min-height: 1.6em;
+            font-family: 'Quicksand', 'Arial', sans-serif;
+        }
+
+        #result[style*="green"] {
+            color: var(--romantic-blue) !important;
+            text-shadow: 0 0 12px #b5fffc77;
+        }
+        #result[style*="red"] {
+            color: var(--romantic-red) !important;
+            text-shadow: 0 0 12px #ffb6c177;
+        }
+        
+        /* Romantic decorative element: hearts floating */
+        .floating-heart {
+            position: absolute;
+            font-size: 1.5em;
+            opacity: 0.55;
+            animation: floatHeart 5s linear infinite;
+            pointer-events: none;
+        }
+        @keyframes floatHeart {
+            0% { transform: translateY(0) scale(1);}
+            100% { transform: translateY(-50px) scale(1.2);}
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 540px) {
+            #quiz-container {
+                max-width: 99vw;
+                padding: 1.5em 0.7em 1.2em 0.7em;
+            }
+            h1 {
+                font-size: 1.25em;
+                padding: 0 0.2em;
+            }
+            #question {
+                font-size: 1em;
+                padding: 0.7em 0.5em;
+            }
+            #answer {
+                font-size: 1em;
+            }
+            #checkBtn {
+                font-size: 1em;
+            }
+        }
+
+        /* Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;700&display=swap');
     </style>
 </head>
 <body>
     <div id="quiz-container">
-        <h1>5 jours en Italie - Vérificateur d'indices</h1>
+        <h1>5 jours en Italie<br>Vérificateur d'indices</h1>
         <div id="question"></div>
         <input type="text" id="answer" autocomplete="off" placeholder="Votre réponse">
         <button id="checkBtn">Vérifier indice</button>
         <div id="checkMsg"></div>
         <div id="result"></div>
+        <!-- Decorative floating hearts -->
+        <span class="floating-heart" style="top:10%; left:10%;">💗</span>
+        <span class="floating-heart" style="top:30%; left:80%; animation-delay:1.2s;">💖</span>
+        <span class="floating-heart" style="top:60%; left:40%; animation-delay:0.6s;">💕</span>
+        <span class="floating-heart" style="top:80%; left:70%; animation-delay:2.1s;">💞</span>
     </div>
 
     <script>
@@ -80,7 +268,7 @@
                         resultDiv.textContent = data.message;
                         resultDiv.style.color = "green";
                     } else {
-                        resultDiv.textContent = "Indice incorrect, essayez encore !";
+                        resultDiv.textContent = "Incorrect!";
                         resultDiv.style.color = "red";
                     }
                 })
