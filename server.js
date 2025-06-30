@@ -10,12 +10,16 @@ app.use(express.json());
 let enigmes = [];
 fs.readFile(csvFilePath, 'utf8', (err, data) => {
   if (!err) {
-    enigmes = data.trim().split('\n').map(line => {
-      const idx = line.indexOf(',');
-      // Defensive: skip lines without comma
-      if (idx === -1) return [null, null];
-      // Trim both the key and value
-      return [line.substring(0, idx).trim(), line.substring(idx + 1).trim()];
+    enigmes = data.trim().split('\n').map((line, idx) => {
+      const comma = line.indexOf(',');
+      if (comma === -1) return [null, null];
+      let key = line.substring(0, comma).trim();
+      // Remove BOM just in case
+      if (idx === 0 && key.charCodeAt(0) === 0xFEFF) {
+        key = key.slice(1);
+      }
+      const value = line.substring(comma + 1).trim();
+      return [key, value];
     }).filter(([key, value]) => key && value);
   } else {
     console.error('Could not read enigmes.csv:', err);
