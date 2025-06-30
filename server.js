@@ -12,12 +12,18 @@ fs.readFile(csvFilePath, 'utf8', (err, data) => {
   if (!err) {
     enigmes = data.trim().split('\n').map(line => {
       const idx = line.indexOf(',');
-      return [line.substring(0, idx), line.substring(idx + 1)];
-    });
+      // Defensive: skip lines without comma
+      if (idx === -1) return [null, null];
+      // Trim both the key and value
+      return [line.substring(0, idx).trim(), line.substring(idx + 1).trim()];
+    }).filter(([key, value]) => key && value);
   } else {
     console.error('Could not read enigmes.csv:', err);
   }
 });
+
+// Serve static files (for index.html, etc.)
+app.use(express.static(__dirname));
 
 // API endpoint to check answer
 app.post('/check', (req, res) => {
@@ -29,9 +35,6 @@ app.post('/check', (req, res) => {
     res.json({ valid: false, message: "Indice incorrect, esssayez encore" });
   }
 });
-
-// Serve static files (for index.html, etc.)
-app.use(express.static(__dirname));
 
 // Start server
 const PORT = process.env.PORT || 3000;
