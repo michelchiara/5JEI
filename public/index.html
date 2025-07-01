@@ -201,7 +201,7 @@
 </head>
 <body>
     <div id="quiz-container">
-        <h1>5 jours en Italie<br>Vérificateur d'indices</h1>
+        <h1>5 jours en Italie<br>Vérificateur d'indices (référez vous au chapitre regles du jeu)</h1>
         <div id="question"></div>
         <input type="text" id="answer" autocomplete="off" placeholder="Votre réponse">
         <button id="checkBtn">Vérifier indice</button>
@@ -273,7 +273,7 @@
                         resultDiv.textContent = data.message;
                         resultDiv.style.color = "green";
                     } else {
-                        resultDiv.textContent = "Incorrect!";
+                        resultDiv.textContent = "Cet indice n'est pas bon, essayez encore";
                         resultDiv.style.color = "red";
                     }
                 })
